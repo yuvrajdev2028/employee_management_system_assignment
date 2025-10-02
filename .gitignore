@@ -46,7 +46,7 @@ yarn-error.log
 
 # History or cache files
 .history/
-.angular/cache/
+.angular/
 .sass-cache/
 
 # Miscellaneous system files
