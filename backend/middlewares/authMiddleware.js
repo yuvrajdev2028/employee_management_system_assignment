@@ -72,3 +72,19 @@ exports.isEmployee = (req,res,next) => {
         })
     }
 }
+
+exports.isNotEmployee = (req,res,next) => {
+    try{
+        if(req.user.role === 'Employee'){
+            return res.status(401).json({
+                message: 'Employees are not allowed to access this route.',
+            })
+        }
+        next();
+    }
+    catch(error){
+        return res.status(500).json({
+            message: 'Authorization failed while accessing protected route for Employees.',
+        })
+    }
+}
