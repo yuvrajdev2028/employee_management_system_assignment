@@ -1,1 +1,1 @@
-//department controller
+//department
