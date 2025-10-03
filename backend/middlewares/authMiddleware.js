@@ -25,6 +25,22 @@ exports.auth = (req,res,next) =>{
     }
 }
 
+exports.isAdmin = (req,res,next) => {
+    try{
+        if(req.user.role !== 'Admin'){
+            return res.status(401).json({
+                message: 'Only Admins can access this route.',
+            })
+        }
+        next();
+    }
+    catch(error){
+        return res.status(500).json({
+            message: 'Authorization failed while accessing protected route for Admins.',
+        })
+    }
+}
+
 exports.isHR = (req,res,next) => {
     try{
         if(req.user.role!=='HR'){
