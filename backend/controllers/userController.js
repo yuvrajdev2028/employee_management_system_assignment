@@ -5,7 +5,14 @@ const { generateAccessToken, generateRefreshToken } = require('../utils/tokenUti
 
 exports.createUser = async(req,res)=>{
     try{
-        // const { name, password, }
+        const { name, companyEmail, password, role} = req.body;
+        const hashedPassword = await hashPassword(password);
+        if(!hashedPassword) throw new Error("Password not hashed");
+        const newUser = new User({name,companyEmail,password:hashedPassword,role});
+        await newUser.save();
+        res.status(200).json({
+            message:"New user created successfully."
+        })
     }
     catch(error){
         console.log("Error occured while creating user: ", error);
@@ -15,7 +22,22 @@ exports.createUser = async(req,res)=>{
     }
 }
 
-// hello from sunny
+exports.removeUser=async(req,res)=>{
+    try{
+        const id = req.params.id;
+        if(!id) throw new Error("ID not found.");
+        await User.deleteOne({_id:id});
+        res.status(200).json({
+            message:"User removed successfully."
+        })
+    }
+    catch(error){
+        console.log("Error occured while removing user:",error)
+        res.status(500).json({
+            message:"Error occured on server while removing user."
+        })
+    }
+}
 
 exports.login = async(req,res)=>{
     try{
@@ -60,7 +82,7 @@ exports.login = async(req,res)=>{
 
 exports.logout = async(req,res)=>{
     try{
-        res.clearCookie('token',{
+        res.clearCookie('refreshToken',{
             httpOnly: true,
             secure: true,
             sameSite: 'Strict'
