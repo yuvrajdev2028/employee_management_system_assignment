@@ -99,3 +99,29 @@ exports.logout = async(req,res)=>{
         })
     }
 }
+
+//get user data
+exports.getUsers=async(req,res)=>{
+    try{
+        const user = User.find();
+        if(!user){
+            res.status(200).json({
+                message:"Users data not fetched"
+            })
+        }
+        res.status(200).json({
+            message:"Users data found succesfully",
+            data:{
+                "name":user.name,
+                "companyEmail":user.companyEmail,
+                "role":user.role
+            }
+        })
+    }
+    catch(error){
+        console.log("Error occured while fetching Users: ",error)
+        res.status(500).json({
+            message:"Error occured on server while fetching Users ."
+        })
+    }
+}
