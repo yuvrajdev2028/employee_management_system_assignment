@@ -9,7 +9,7 @@ exports.populateAttendance=async()=>{
             await Attendance.findOneAndUpdate(
                 { employee: employee._id, date: new Date().toISOString().split("T")[0] },
                 { employee: employee._id, date: new Date().toISOString().split("T")[0], status: "Absent" },
-                { new: true, upsert: true } 
+                {upsert: true } 
             );
         })
     }
