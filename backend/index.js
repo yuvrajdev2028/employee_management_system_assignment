@@ -7,6 +7,7 @@ const cors=require('cors');
 const dbConnect = require('./config/databaseConfig');
 
 const userRoutes = require('./routes/userRoutes');
+const employeeRoutes = require('./routes/employeeRoutes');
 
 PORT = process.env.PORT||5000;
 
@@ -18,6 +19,7 @@ app.use(helmet());
 app.use(cors({credentials:true}))
 
 app.use('/api/v1',userRoutes)
+app.use('/api/v1',employeeRoutes)
 
 app.get("/",(req,res)=>{
     res.send("<h2>Server started...</h2>")
