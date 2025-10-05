@@ -18,7 +18,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.use(helmet());
-app.use(cors({origin: 'https://ems-frontend-sable.vercel.app/',credentials:true}))
+app.use(cors({origin: 'https://ems-frontend-sable.vercel.app',credentials:true}))
 
 app.use('/api/v1',userRoutes)
 app.use('/api/v1',employeeRoutes)
