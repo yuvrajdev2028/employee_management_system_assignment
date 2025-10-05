@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { TokenStorage } from './token-storage';
 import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
 import { jwtDecode } from 'jwt-decode'
+import { environment } from '../../environments/environment';
 
 interface LoginResponse {
   accessToken: string;
@@ -12,6 +13,7 @@ interface LoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private baseUrl = environment.apiUrl;
   private accessTokenSub = new BehaviorSubject<string | null>(null);
   accessToken$ = this.accessTokenSub.asObservable();
 
@@ -19,7 +21,7 @@ export class AuthService {
 
   login(username: string, password: string): Observable<any> {
     return this.http.post<LoginResponse>(
-      'http://localhost:4000/api/v1/login',
+      `${this.baseUrl}/login`,
       { email:username, password },
       { withCredentials: true }
     ).pipe(
@@ -32,7 +34,7 @@ export class AuthService {
 
   logout(): Observable<void> {
     return this.http.post<void>(
-      '/api/auth/logout',
+      `${this.baseUrl}/logout`,
       {},
       { withCredentials: true }
     ).pipe(
@@ -45,7 +47,7 @@ export class AuthService {
 
   refreshAccessToken(): Observable<any> {
     return this.http.post<LoginResponse>(
-      '/api/auth/refresh',
+      `${this.baseUrl}/refresh`,
       {},
       { withCredentials: true }
     ).pipe(
@@ -53,7 +55,6 @@ export class AuthService {
         this.tokenStorage.setAccessToken(resp.accessToken);
         this.accessTokenSub.next(resp.accessToken);
       }),
-      // On refresh failure, you might want to clear state
     );
   }
 

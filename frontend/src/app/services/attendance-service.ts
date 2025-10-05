@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class AttendanceService {
-  private baseUrl = 'http://localhost:4000/api/v1'; // Update to your backend URL if deployed
+  private baseUrl = environment.apiUrl; // Update to your backend URL if deployed
 
   constructor(private http: HttpClient) {}
   markAttendance(): Observable<any> {
