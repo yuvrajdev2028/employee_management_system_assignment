@@ -41,7 +41,7 @@ exports.removeUser=async(req,res)=>{
 
 exports.login = async(req,res)=>{
     try{
-        console.log(req.body)
+        // console.log(req.body)
         const { email, password } = req.body;
         const user = await User.findOne({companyEmail: email});
         if(!user){
