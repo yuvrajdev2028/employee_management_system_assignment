@@ -41,12 +41,18 @@ exports.removeUser=async(req,res)=>{
 
 exports.login = async(req,res)=>{
     try{
+        console.log(req.body)
         const { email, password } = req.body;
         const user = await User.findOne({companyEmail: email});
-        const isValid = await comparePassword(password,user.password);
-        if(!user || !isValid){
+        if(!user){
             return res.status(401).json({
-                message: 'Invalid Email or Password',
+                message: 'Invalid Email',
+            })
+        }
+        const isValid = await comparePassword(password,user.password);
+        if(!isValid){
+            return res.status(401).json({
+                message: 'Invalid Password',
             })
         }
         // Generate Access Token
@@ -101,27 +107,85 @@ exports.logout = async(req,res)=>{
 }
 
 //get user data
-exports.getUsers=async(req,res)=>{
-    try{
-        const user = User.find();
-        if(!user){
-            res.status(200).json({
-                message:"Users data not fetched"
-            })
-        }
-        res.status(200).json({
-            message:"Users data found succesfully",
-            data:{
-                "name":user.name,
-                "companyEmail":user.companyEmail,
-                "role":user.role
-            }
-        })
+exports.getUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;  // default page = 1
+    const limit = parseInt(req.query.limit) || 20; // default limit = 20
+    const skip = (page - 1) * limit;
+
+    // Fetch total user count for pagination
+    const total = await User.countDocuments();
+
+    // Fetch paginated users
+    const users = await User.find({ role: { $ne: 'Admin' } }, 'name companyEmail role')
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        message: 'No users found',
+        users: [],
+        total: 0,
+      });
     }
-    catch(error){
-        console.log("Error occured while fetching Users: ",error)
-        res.status(500).json({
-            message:"Error occured on server while fetching Users ."
-        })
+
+    res.status(200).json({
+      message: 'Users fetched successfully',
+      users,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    console.error('Error occurred while fetching users:', error);
+    res.status(500).json({
+      message: 'Error occurred on server while fetching users.',
+    });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if ID is valid
+    if (!id) {
+      return res.status(400).json({ message: 'User ID is required' });
     }
-}
+
+    // Extract fields to update (only allow specific fields)
+    const { name, companyEmail, password, role } = req.body;
+
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (companyEmail) updateFields.companyEmail = companyEmail;
+    if (role) updateFields.role = role;
+    if (password){
+        let hashedPassword = await hashPassword(password);
+        if(!hashedPassword) throw new Error("Error occured while hashing updated password.")
+        updateFields.password=hashedPassword;
+    }
+
+    // Update user and return new document
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $set: updateFields },
+      { new: true, runValidators: true, lean: true }
+    ).select('name companyEmail role');
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      message: 'Error occurred while updating user on the server',
+    });
+  }
+};

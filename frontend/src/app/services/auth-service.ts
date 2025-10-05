@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TokenStorage } from './token-storage';
 import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import { jwtDecode } from 'jwt-decode'
 
 interface LoginResponse {
   accessToken: string;
@@ -18,8 +19,8 @@ export class AuthService {
 
   login(username: string, password: string): Observable<any> {
     return this.http.post<LoginResponse>(
-      '/api/auth/login',
-      { username, password },
+      'http://localhost:4000/api/v1/login',
+      { email:username, password },
       { withCredentials: true }
     ).pipe(
       tap(resp => {
@@ -62,5 +63,16 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getAccessToken();
+  }
+
+  getUserRole(): string | null {
+    const token = this.getAccessToken();
+    if (!token) return null;
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.role || null;
+    } catch {
+      return null;
+    }
   }
 }

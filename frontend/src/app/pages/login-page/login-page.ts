@@ -30,7 +30,7 @@ export class LoginPage {
     this.error = null;
     const { username, password } = this.form.value;
     this.auth.login(username, password).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => this.router.navigate(['/dashboard']),
       error: err => {
         this.error = err?.error?.message || 'Login failed';
       }
