@@ -9,7 +9,8 @@ exports.markAttendance=async(req,res)=>{
 
         await Attendance.findOneAndUpdate(
             {employee:employee._id,date:new Date().toISOString().split("T")[0]},
-            {employee:employee._id,date:new Date().toISOString().split("T")[0],status:"Present"}
+            {employee:employee._id,date:new Date().toISOString().split("T")[0],status:"Present"},
+            {upsert:true}
         )
 
         res.status(200).json({
